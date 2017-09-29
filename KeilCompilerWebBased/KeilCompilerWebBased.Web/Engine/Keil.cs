@@ -195,29 +195,34 @@ namespace KeilCompilerWebBased.Web.Engine
         }
 
         public bool UnzipBaseCodeToDirectory(
-            string TargetDirectory,
-            out string ObjectFolder)
+            string ZipSource,
+            string TargetDirectory)
         {
             bool boRet = true;
-            string ZipSource = @"D:\PrivateOS\MiniTG132.zip";
+            // string ZipSource = @"D:\PrivateOS\MiniTG132.zip";
 
             try
             {
                 ZipFile.ExtractToDirectory(ZipSource, TargetDirectory);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                string s = ex.Message;
                 boRet = false;
             }
 
-            ObjectFolder = Path.Combine(TargetDirectory, @"MiniTG132\TG132\Obj");
+            // ObjectFolder = Path.Combine(TargetDirectory, @"MiniTG132\TG132\Obj");
             return boRet;
         }
 
-        public bool CompileAll(
+        public List<string> CompileAll(
             string folderpath,
-            string targetpath)
+            string targetpath,
+            out string outputcommand)
         {
+            StringBuilder sb = new StringBuilder();
+            List<string> listStr = new List<string>();
+
             try
             {
                 string strCmdText = "";
@@ -237,7 +242,7 @@ namespace KeilCompilerWebBased.Web.Engine
                             "C51.exe" :
                             "A51.exe";
 
-                        strCmdText = string.Format("/C cd {0} & \"{1}{2}\" @{3}{4}",
+                        strCmdText = string.Format("/C cd {0} & D: & \"{1}{2}\" @{3}{4}",
                             targetpath,
                             KeilProjectFile.BinPath,
                             CompilerFile,
@@ -253,39 +258,57 @@ namespace KeilCompilerWebBased.Web.Engine
                         // process.WaitForExit();
 
                         string errr;
-
                         string s = RunConsole(strCmdText, out errr);
+
+                        if(errr != "")
+                        {
+                            sb.AppendLine(errr);
+                            listStr.Add(errr);
+                        }
+                        if(s != "")
+                        {
+                            sb.AppendLine(s);
+                            listStr.Add(s);
+                        }
                     }
                 }
-
-                return true;
             }
             catch (Exception ex)
             {
                 string ss = ex.Message;
-                return false;
             }
+            finally
+            {
+                outputcommand = sb.ToString();
+
+            }
+            
+            return listStr;
+            
         }
 
-        public bool BuildAll(
+        public List<string> BuildAll(
             string targetpath)
         {
+            List<string> listStr = new List<string>();
+
             try
             {
+                // Execute LX51.exe
                 string strCmdText = String.Format(
-                    "/C cd {0} & \"{1}LX51.EXE\" @{2}{3}.LNP & \"{1}OHX51.EXE\" \"{2}{3}\" H386",
+                    "/C cd {0} & D: & \"{1}LX51.EXE\" @{2}{3}.LNP",
                     targetpath,
                     KeilProjectFile.BinPath,
                     KeilProjectFile.OutputDirectory,
                     KeilProjectFile.OutputName);
 
-                Process process = new Process();
-                ProcessStartInfo startInfo = new ProcessStartInfo();
-                startInfo.FileName = "cmd.exe";
-                startInfo.Arguments = strCmdText;
-                process.StartInfo = startInfo;
-                process.Start();
-                process.WaitForExit();
+                // Process process = new Process();
+                // ProcessStartInfo startInfo = new ProcessStartInfo();
+                // startInfo.FileName = "cmd.exe";
+                // startInfo.Arguments = strCmdText;
+                // process.StartInfo = startInfo;
+                // process.Start();
+                // process.WaitForExit();
 
                 // string command1 = String.Format(
                 //     "/C cd {0}",
@@ -310,13 +333,54 @@ namespace KeilCompilerWebBased.Web.Engine
                 // RunConsole(command2);
                 // RunConsole(command3);
 
-                return true;
+                string errr;
+                string s = RunConsole(strCmdText, out errr);
+
+                if(errr != "")
+                {
+                    listStr.Add(errr);
+                }
+                if(s != "")
+                {
+                    listStr.Add(s);
+                }
+
+                // Find the newest file name
+                var directory = new DirectoryInfo(
+                    Path.Combine(
+                        targetpath,
+                        KeilProjectFile.OutputDirectory));
+                var myFile = (from f in directory.GetFiles()
+                    orderby f.LastWriteTime descending
+                    select f).First();
+
+                string targetfilename = Path.GetFileNameWithoutExtension(myFile.Name);
+
+                // Execute OHX51.exe
+                strCmdText = String.Format(
+                    "/C cd {0} & D: & \"{1}OHX51.EXE\" \"{2}{3}\" H386",
+                    targetpath,
+                    KeilProjectFile.BinPath,
+                    KeilProjectFile.OutputDirectory,
+                    targetfilename);
+
+                s = RunConsole(strCmdText, out errr);
+
+                if(errr != "")
+                {
+                    listStr.Add(errr);
+                }
+                if(s != "")
+                {
+                    listStr.Add(s);
+                }
             }
             catch (Exception ex)
             {
                 string ss = ex.Message;
-                return false;
             }
+
+            return listStr;
         }
 
         public string RunConsole(

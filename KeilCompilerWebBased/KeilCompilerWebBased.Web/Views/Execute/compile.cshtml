@@ -1,0 +1,3 @@
+<!-- @Html.Raw(Html.Encode(@ViewData["OutputCompile"]).Replace(Environment.NewLine, "<br />")) -->
+
+<p><span>@Html.Raw(HtmlDecode(@ViewData["OutputCompile"]))</span></p>

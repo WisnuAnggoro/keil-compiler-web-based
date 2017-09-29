@@ -1,0 +1,16 @@
+<h1 align="center">CIPTA Web-based Keil Compiler</h1>
+<h3>Upload .uvproj File</h3>
+<form align="center" 
+    method="post" 
+    enctype="multipart/form-data" 
+    asp-action="UploadSources" 
+    asp-controller="Execute">
+    <input type="file" name="uvprojFile" width="100%" />
+    <input type="submit" value="Upload" />
+</form>
+
+<h3>Compile and Build</h3>
+@using (Html.BeginForm("compile", "Execute"))
+{
+    <button style="margin:5px" type="submit" name="compileall">Compile All</button>
+}
