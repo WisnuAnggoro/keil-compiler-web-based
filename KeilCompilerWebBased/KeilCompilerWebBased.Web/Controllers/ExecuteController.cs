@@ -1,5 +1,6 @@
 using KeilCompilerWebBased.Web.Engine;
 using KeilCompilerWebBased.Web.Models;
+using KeilCompilerWebBased.Web.ViewModel;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -7,6 +8,7 @@ using System.Threading.Tasks;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net;
 //using System.Web;
 
 namespace KeilCompilerWebBased.Web.Controllers
@@ -30,6 +32,9 @@ namespace KeilCompilerWebBased.Web.Controllers
         // Containing list of *.__i files
         private static List<IncludeDirectoryPath> listFile;
 
+        // List of available OS source
+        private static List<OSType> _osTypeList;
+
         // Accessing all method in Keil class
         private Keil _keil;
 
@@ -38,12 +43,54 @@ namespace KeilCompilerWebBased.Web.Controllers
             _configuration = configuration;
             _rootPath = _configuration["RootPath"];
             _keil = new Keil();
+
+            // Initialize the available OS source
+            _osTypeList = new List<OSType>();
+            _osTypeList.Add(new OSType{Id = 1, Name = "Mini OS on TG132"});
+            _osTypeList.Add(new OSType{Id = 2, Name = "USIM OS on TG132"});
+            _osTypeList.Add(new OSType{Id = 3, Name = "USIM OS on W9F4"});
         }
 
         public IActionResult Index()  
-        {  
-            ViewBag.connectionstring = _configuration["RootPath"];  
-            return View();  
+        {
+            OSTypeViewModel osTypeViewModel = new OSTypeViewModel();
+            osTypeViewModel.OSTypeList = _osTypeList;
+            osTypeViewModel.SelectedOSType = String.Empty;
+
+            // ViewBag.connectionstring = _configuration["RootPath"];
+            if(TempData["ErrorOsSelectionMessage"] != null)
+                ViewBag.ErrorOsSelection = TempData["ErrorOsSelectionMessage"].ToString();
+            return View(osTypeViewModel);
+        }
+
+        [HttpPost]
+        public IActionResult Index(OSTypeViewModel OsTypeViewModel)
+        {
+            if(OsTypeViewModel.SelectedOSType != null)
+                return RedirectToAction("UploadSources", OsTypeViewModel);
+            else
+            {
+                TempData["ErrorOsSelectionMessage"] = "Please select one of the above options!";
+                return RedirectToAction("Index", "Execute");
+            }
+        }
+
+        public IActionResult SelectOSChip(OSTypeViewModel OsTypeViewModel)
+        {
+            return View(OsTypeViewModel);
+        }
+
+        public IActionResult UploadSources(OSTypeViewModel OsTypeViewModel)
+        {
+            // I'm strongly confident to use Parse instead of TryParse
+            int iSelectOs = Int32.Parse(OsTypeViewModel.SelectedOSType);
+
+            // Int32.TryParse(
+            //     OsTypeViewModel.SelectedOSType, 
+            //     out iSelectOs);
+
+            ViewBag.SelectedOsType = _osTypeList[iSelectOs - 1].Name;
+            return View();
         }
 
         [HttpPost]
