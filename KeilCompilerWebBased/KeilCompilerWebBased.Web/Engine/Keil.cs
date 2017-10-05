@@ -182,7 +182,8 @@ namespace KeilCompilerWebBased.Web.Engine
                 ));
 
                 File.WriteAllText(
-                    Path.Combine(TargetPath, KeilProjectFile.OutputName + ".lnp"),
+                    // Path.Combine(TargetPath, KeilProjectFile.OutputName + ".lnp"),
+                    TargetPath + "/" + KeilProjectFile.OutputName + ".lnp",
                     sb.ToString());
             }
             catch (Exception ex)
@@ -229,6 +230,7 @@ namespace KeilCompilerWebBased.Web.Engine
                 KeilProjectFile.OutputDirectory = "./TG132/Obj/";
 
                 string strCmdText = "";
+                // string strCmdTextAll = "";
 
                 // Get all *.__i and *._ia files
                 string[] files = Directory.GetFiles(
@@ -251,6 +253,12 @@ namespace KeilCompilerWebBased.Web.Engine
                             CompilerFile,
                             KeilProjectFile.OutputDirectory,
                             Path.GetFileName(file));
+
+                        // strCmdTextAll += string.Format(" && wine {0}{1} @{2}{3}",
+                        //     KeilProjectFile.BinPath,
+                        //     CompilerFile,
+                        //     KeilProjectFile.OutputDirectory,
+                        //     Path.GetFileName(file));
 
                         // strCmdText = string.Format("-c \"wine {0}{1} @{2}/{3}\"",
                         //     KeilProjectFile.BinPath,
@@ -275,6 +283,25 @@ namespace KeilCompilerWebBased.Web.Engine
                         }
                     }
                 }
+
+                // strCmdText = string.Format(
+                //     "-c \"cd {0}{1}\"",
+                //     targetpath,
+                //     strCmdTextAll);
+
+                // string errr;
+                // string s = RunConsole(strCmdText, out errr);
+
+                // if (errr != "")
+                // {
+                //     sb.AppendLine(errr);
+                //     listStr.Add(errr);
+                // }
+                // if (s != "")
+                // {
+                //     sb.AppendLine(s);
+                //     listStr.Add(s);
+                // }
             }
             catch (Exception ex)
             {
@@ -297,9 +324,19 @@ namespace KeilCompilerWebBased.Web.Engine
 
             try
             {
+                KeilProjectFile.BinPath = "/home/wisnu/.wine/drive_c/keil/c51/bin/";
+                KeilProjectFile.OutputDirectory = "./TG132/Obj/";
+
                 // Execute LX51.exe
-                string strCmdText = String.Format(
-                    "/C cd {0} & D: & \"{1}LX51.EXE\" @{2}{3}.LNP",
+                // string strCmdText = String.Format(
+                //     "/C cd {0} & D: & \"{1}LX51.EXE\" @{2}{3}.LNP",
+                //     targetpath,
+                //     KeilProjectFile.BinPath,
+                //     KeilProjectFile.OutputDirectory,
+                //     KeilProjectFile.OutputName);
+
+                string strCmdText = string.Format(
+                    "-c \"cd {0} && wine {1}LX51.EXE @{2}{3}.LNP\"",
                     targetpath,
                     KeilProjectFile.BinPath,
                     KeilProjectFile.OutputDirectory,
@@ -329,12 +366,18 @@ namespace KeilCompilerWebBased.Web.Engine
                 string targetfilename = Path.GetFileNameWithoutExtension(myFile.Name);
 
                 // Execute OHX51.exe
-                strCmdText = String.Format(
-                    "/C cd {0} & D: & \"{1}OHX51.EXE\" \"{2}{3}\" H386",
+                // strCmdText = String.Format(
+                //     "/C cd {0} & D: & \"{1}OHX51.EXE\" \"{2}{3}\" H386",
+                //     targetpath,
+                //     KeilProjectFile.BinPath,
+                //     KeilProjectFile.OutputDirectory,
+                //     targetfilename);
+                strCmdText = string.Format(
+                    "-c \"cd {0} && wine {1}OHX51.EXE \"{2}{3}\" H386\"",
                     targetpath,
                     KeilProjectFile.BinPath,
                     KeilProjectFile.OutputDirectory,
-                    targetfilename);
+                    KeilProjectFile.OutputName);
 
                 s = RunConsole(strCmdText, out errr);
 
