@@ -182,7 +182,8 @@ namespace KeilCompilerWebBased.Web.Engine
                 ));
 
                 File.WriteAllText(
-                    Path.Combine(TargetPath, KeilProjectFile.OutputName + ".lnp"),
+                    // Path.Combine(TargetPath, KeilProjectFile.OutputName + ".lnp"),
+                    TargetPath + "/" + KeilProjectFile.OutputName + ".lnp",
                     sb.ToString());
             }
             catch (Exception ex)
@@ -225,7 +226,11 @@ namespace KeilCompilerWebBased.Web.Engine
 
             try
             {
+                KeilProjectFile.BinPath = "/home/wisnu/.wine/drive_c/keil/c51/bin/";
+                KeilProjectFile.OutputDirectory = "./TG132/Obj/";
+
                 string strCmdText = "";
+                // string strCmdTextAll = "";
 
                 // Get all *.__i and *._ia files
                 string[] files = Directory.GetFiles(
@@ -242,20 +247,26 @@ namespace KeilCompilerWebBased.Web.Engine
                             "C51.exe" :
                             "A51.exe";
 
-                        strCmdText = string.Format("/C cd {0} & D: & \"{1}{2}\" @{3}{4}",
+                        strCmdText = string.Format("-c \"cd {0} && wine {1}{2} @{3}{4}\"",
                             targetpath,
                             KeilProjectFile.BinPath,
                             CompilerFile,
                             KeilProjectFile.OutputDirectory,
                             Path.GetFileName(file));
 
-                        // Process process = new Process();
-                        // ProcessStartInfo startInfo = new ProcessStartInfo();
-                        // startInfo.FileName = "cmd.exe";
-                        // startInfo.Arguments = strCmdText;
-                        // process.StartInfo = startInfo;
-                        // process.Start();
-                        // process.WaitForExit();
+                        // strCmdTextAll += string.Format(" && wine {0}{1} @{2}{3}",
+                        //     KeilProjectFile.BinPath,
+                        //     CompilerFile,
+                        //     KeilProjectFile.OutputDirectory,
+                        //     Path.GetFileName(file));
+
+                        // strCmdText = string.Format("-c \"wine {0}{1} @{2}/{3}\"",
+                        //     KeilProjectFile.BinPath,
+                        //     CompilerFile,
+                        //     folderpath,
+                        //     Path.GetFileName(file));
+
+                        // strCmdText = "-c \"wine --version\"";
 
                         string errr;
                         string s = RunConsole(strCmdText, out errr);
@@ -272,6 +283,25 @@ namespace KeilCompilerWebBased.Web.Engine
                         }
                     }
                 }
+
+                // strCmdText = string.Format(
+                //     "-c \"cd {0}{1}\"",
+                //     targetpath,
+                //     strCmdTextAll);
+
+                // string errr;
+                // string s = RunConsole(strCmdText, out errr);
+
+                // if (errr != "")
+                // {
+                //     sb.AppendLine(errr);
+                //     listStr.Add(errr);
+                // }
+                // if (s != "")
+                // {
+                //     sb.AppendLine(s);
+                //     listStr.Add(s);
+                // }
             }
             catch (Exception ex)
             {
@@ -294,44 +324,23 @@ namespace KeilCompilerWebBased.Web.Engine
 
             try
             {
+                KeilProjectFile.BinPath = "/home/wisnu/.wine/drive_c/keil/c51/bin/";
+                KeilProjectFile.OutputDirectory = "./TG132/Obj/";
+
                 // Execute LX51.exe
-                string strCmdText = String.Format(
-                    "/C cd {0} & D: & \"{1}LX51.EXE\" @{2}{3}.LNP",
+                // string strCmdText = String.Format(
+                //     "/C cd {0} & D: & \"{1}LX51.EXE\" @{2}{3}.LNP",
+                //     targetpath,
+                //     KeilProjectFile.BinPath,
+                //     KeilProjectFile.OutputDirectory,
+                //     KeilProjectFile.OutputName);
+
+                string strCmdText = string.Format(
+                    "-c \"cd {0} && wine {1}LX51.EXE @{2}{3}.LNP\"",
                     targetpath,
                     KeilProjectFile.BinPath,
                     KeilProjectFile.OutputDirectory,
                     KeilProjectFile.OutputName);
-
-                // Process process = new Process();
-                // ProcessStartInfo startInfo = new ProcessStartInfo();
-                // startInfo.FileName = "cmd.exe";
-                // startInfo.Arguments = strCmdText;
-                // process.StartInfo = startInfo;
-                // process.Start();
-                // process.WaitForExit();
-
-                // string command1 = String.Format(
-                //     "/C cd {0}",
-                //     targetpath
-                // );
-
-                // string command2 = String.Format(
-                //     "\"{0}LX51.EXE\" @{1}{2}.LNP",
-                //     KeilProjectFile.BinPath,
-                //     KeilProjectFile.OutputDirectory,
-                //     KeilProjectFile.OutputName
-                // );
-
-                // string command3 = String.Format(
-                //     "\"{0}OHX51.EXE\" \"{1}{2}\" H386",
-                //     KeilProjectFile.BinPath,
-                //     KeilProjectFile.OutputDirectory,
-                //     KeilProjectFile.OutputName
-                // );
-
-                // RunConsole(command1);
-                // RunConsole(command2);
-                // RunConsole(command3);
 
                 string errr;
                 string s = RunConsole(strCmdText, out errr);
@@ -357,12 +366,18 @@ namespace KeilCompilerWebBased.Web.Engine
                 string targetfilename = Path.GetFileNameWithoutExtension(myFile.Name);
 
                 // Execute OHX51.exe
-                strCmdText = String.Format(
-                    "/C cd {0} & D: & \"{1}OHX51.EXE\" \"{2}{3}\" H386",
+                // strCmdText = String.Format(
+                //     "/C cd {0} & D: & \"{1}OHX51.EXE\" \"{2}{3}\" H386",
+                //     targetpath,
+                //     KeilProjectFile.BinPath,
+                //     KeilProjectFile.OutputDirectory,
+                //     targetfilename);
+                strCmdText = string.Format(
+                    "-c \"cd {0} && wine {1}OHX51.EXE \"{2}{3}\" H386\"",
                     targetpath,
                     KeilProjectFile.BinPath,
                     KeilProjectFile.OutputDirectory,
-                    targetfilename);
+                    KeilProjectFile.OutputName);
 
                 s = RunConsole(strCmdText, out errr);
 
@@ -389,7 +404,7 @@ namespace KeilCompilerWebBased.Web.Engine
         )
         {
             Process process = new Process();
-            process.StartInfo.FileName = "cmd.exe";
+            process.StartInfo.FileName = "/bin/bash";
             process.StartInfo.Arguments = cmd;
             process.StartInfo.UseShellExecute = false;
             process.StartInfo.RedirectStandardOutput = true;

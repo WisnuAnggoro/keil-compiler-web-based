@@ -65,7 +65,7 @@ namespace KeilCompilerWebBased.Web.Controllers
                 _sourcePath = _configuration[argument];
                 _objectPath = Path.Combine(
                     _sessionPath, 
-                    @"MiniTG132\TG132\Obj");    
+                    _configuration["BaseCodeList:0:ObjPath"]);    
 
                 // Preparing source code
                 _keil.UnzipBaseCodeToDirectory(
@@ -74,7 +74,7 @@ namespace KeilCompilerWebBased.Web.Controllers
                 
                 listFile = new List<IncludeDirectoryPath>();
                 string s = 
-                    $@"{_sessionPath}\{_configuration["BaseCodeList:0:Title"]}\{_configuration["BaseCodeList:0:FileName"]}";
+                    $@"{_sessionPath}/{_configuration["BaseCodeList:0:Title"]}/{_configuration["BaseCodeList:0:FileName"]}";
                 listFile = _keil.UVProjectFileToIFileList(
                     s);
                 
