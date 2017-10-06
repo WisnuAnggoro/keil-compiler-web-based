@@ -9,7 +9,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
-//using System.Web;
+using System.Linq;
+using Microsoft.Extensions.FileProviders;
 
 namespace KeilCompilerWebBased.Web.Controllers
 {
@@ -34,6 +35,8 @@ namespace KeilCompilerWebBased.Web.Controllers
 
         // List of available OS source
         private static List<OSType> _osTypeList;
+        // Selected OS Index retrieved from user input
+        private static int _selectedOsIndex;
 
         // Accessing all method in Keil class
         private Keil _keil;
@@ -46,125 +49,249 @@ namespace KeilCompilerWebBased.Web.Controllers
 
             // Initialize the available OS source
             _osTypeList = new List<OSType>();
-            _osTypeList.Add(new OSType{Id = 1, Name = "Mini OS on TG132"});
-            _osTypeList.Add(new OSType{Id = 2, Name = "USIM OS on TG132"});
-            _osTypeList.Add(new OSType{Id = 3, Name = "USIM OS on W9F4"});
+            _osTypeList.Add(new OSType { Id = 1, Name = "Mini OS on TG132" });
+            _osTypeList.Add(new OSType { Id = 2, Name = "USIM OS on TG132" });
+            _osTypeList.Add(new OSType { Id = 3, Name = "USIM OS on W9F4" });
         }
 
-        public IActionResult Index()  
+        public IActionResult Index()
         {
             OSTypeViewModel osTypeViewModel = new OSTypeViewModel();
             osTypeViewModel.OSTypeList = _osTypeList;
             osTypeViewModel.SelectedOSType = String.Empty;
 
             // ViewBag.connectionstring = _configuration["RootPath"];
-            if(TempData["ErrorOsSelectionMessage"] != null)
-                ViewBag.ErrorOsSelection = TempData["ErrorOsSelectionMessage"].ToString();
+            // if (TempData["ErrorOsSelectionMessage"] != null)
+            //     ViewBag.ErrorOsSelection = TempData["ErrorOsSelectionMessage"].ToString();
             return View(osTypeViewModel);
         }
 
         [HttpPost]
         public IActionResult Index(OSTypeViewModel OsTypeViewModel)
         {
-            if(OsTypeViewModel.SelectedOSType != null)
-                return RedirectToAction("UploadSources", OsTypeViewModel);
+            if (OsTypeViewModel.SelectedOSType != null)
+            {
+                // I'm strongly confident to use Parse instead of TryParse
+                _selectedOsIndex = Int32.Parse(OsTypeViewModel.SelectedOSType);
+
+                // Int32.TryParse(
+                //     OsTypeViewModel.SelectedOSType, 
+                //     out iSelectOs);
+
+                // return RedirectToAction(
+                //     "UploadSources", 
+                //     new { SelectedOsIndex = _selectedOsIndex });
+
+                return RedirectToAction(
+                    "UploadSources");
+            }
             else
             {
-                TempData["ErrorOsSelectionMessage"] = "Please select one of the above options!";
+                // TempData["ErrorOsSelectionMessage"] = "Please select one of the above options!";
                 return RedirectToAction("Index", "Execute");
             }
         }
 
-        public IActionResult SelectOSChip(OSTypeViewModel OsTypeViewModel)
+        // public IActionResult SelectOSChip(OSTypeViewModel OsTypeViewModel)
+        // {
+        //     return View(OsTypeViewModel);
+        // }
+
+        public IActionResult UploadSources()
         {
-            return View(OsTypeViewModel);
-        }
+            // Previous action that successfully performed
+            // ViewBag.SelectedOsType = _osTypeList[SelectedOsIndex - 1].Name;
+            ViewBag.SelectedOsType = _osTypeList[_selectedOsIndex - 1].Name;
 
-        public IActionResult UploadSources(OSTypeViewModel OsTypeViewModel)
-        {
-            // I'm strongly confident to use Parse instead of TryParse
-            int iSelectOs = Int32.Parse(OsTypeViewModel.SelectedOSType);
+            // Init project based on SelectedOsIndex
+            bool isSuccess = InitProject(_selectedOsIndex);
 
-            // Int32.TryParse(
-            //     OsTypeViewModel.SelectedOSType, 
-            //     out iSelectOs);
+            if (!isSuccess)
+            {
+                // If error occurs, user can't do anything
+                // Better call the Admin
+                ViewBag.ErrorMessage =
+                    "Unable to initialize project." +
+                    TempData["ErrorInitProjectMessage"];
 
-            ViewBag.SelectedOsType = _osTypeList[iSelectOs - 1].Name;
+                return View("Error");
+            }
+
+            if (TempData["ErrorUploadSourceMessage"] != null)
+                ViewBag.ErrorUploadSource = TempData["ErrorUploadSourceMessage"].ToString();
             return View();
         }
 
         [HttpPost]
-        public async Task<IActionResult> UploadSources(IFormFile uvprojFile)
+        public async Task<IActionResult> UploadSources(
+            List<IFormFile> SourceCodeFiles)
         {
+            List<SourceCodeFile> uploadedSourceCodeFileList =
+                    new List<SourceCodeFile>();
+
+            long size = SourceCodeFiles.Sum(f => f.Length);
+
+            // full path to file in temp location
+            var filePath = Path.GetTempFileName();
+
+            foreach (var formFile in SourceCodeFiles)
+            {
+                if (formFile.Length > 0)
+                {
+                    uploadedSourceCodeFileList.Add(
+                        new SourceCodeFile()
+                        {
+                            FileName = formFile.FileName,
+                            FilePath = filePath
+                        }
+                    );
+
+                    using (var stream = new FileStream(
+                        filePath,
+                        FileMode.Create))
+                    {
+                        await formFile.CopyToAsync(stream);
+                    }
+                }
+            }
+
+            if (size > 0)
+            {
+                SourceCodeFilesViewModel sourceCodeVM =
+                    new SourceCodeFilesViewModel(
+                        uploadedSourceCodeFileList
+                    );
+
+                return View(
+                    "CompileAndBuild",
+                    sourceCodeVM);
+            }
+            else
+            {
+                TempData["ErrorUploadSourceMessage"] =
+                    "Please select at least one file before press UPLOAD button!";
+
+                // return View(
+                //     "UploadSources", 
+                //     new { SelectedOsIndex = _selectedOsIndex });
+
+                return RedirectToAction(
+                    "UploadSources");
+            }
+        }
+
+        public IActionResult CompileAndBuild(
+            SourceCodeFilesViewModel sourceCodeFilesVM)
+        {
+            return View(sourceCodeFilesVM);
+        }
+
+        [HttpPost]
+        public IActionResult CompileAndBuild()
+        {
+            RunProcess();
+            return View();
+        }
+
+        public async Task<IActionResult> DownloadHex(string filePath)
+        {
+            // Find Hex File
+            
+            IFileProvider provider = new PhysicalFileProvider(filePath);
+            IFileInfo fileInfo = provider.GetFileInfo(fileName);
+            var readStream = fileInfo.CreateReadStream();
+            var mimeType = "application/vnd.ms-excel";
+            return File(readStream, mimeType, fileName);
+        }
+
+        private bool InitProject(int ProjectNumber)
+        {
+            // Project Number is 1 based
+            // BaseCodeList is 0 based
+            string BaseCodeList = "BaseCodeList:" + (ProjectNumber - 1);
+
             try
             {
-                string argument = "BaseCodeList:0:BasePath";
-            
+                // string argument = "BaseCodeList:0:BasePath";
+
                 _sessionPath = Path.Combine(
-                    _rootPath, 
+                    _rootPath,
                     Path.GetFileNameWithoutExtension(
                         Path.GetRandomFileName()));
-                    
-                if(!Directory.Exists(_sessionPath))
-                Directory.CreateDirectory(
-                    _sessionPath);
 
-                _sourcePath = _configuration[argument];
+                if (!Directory.Exists(_sessionPath))
+                    Directory.CreateDirectory(
+                        _sessionPath);
+
+                _sourcePath = _configuration[BaseCodeList + ":BasePath"];
                 _objectPath = Path.Combine(
-                    _sessionPath, 
-                    _configuration["BaseCodeList:0:ObjPath"]);    
+                    _sessionPath,
+                    _configuration[BaseCodeList + ":ObjPath"]);
 
                 // Preparing source code
                 _keil.UnzipBaseCodeToDirectory(
-                    _configuration["BaseCodeList:0:ZipPath"],
+                    _configuration[BaseCodeList + ":ZipPath"],
                     _sessionPath);
-                
+
                 listFile = new List<IncludeDirectoryPath>();
-                string s = 
-                    $@"{_sessionPath}/{_configuration["BaseCodeList:0:Title"]}/{_configuration["BaseCodeList:0:FileName"]}";
+                string sUvProjFilePath = String.Format(
+                    "{0}/{1}/{2}",
+                    _sessionPath,
+                    _configuration[BaseCodeList + ":Title"],
+                    _configuration[BaseCodeList + ":FileName"]
+                );
+                // $@"{_sessionPath}/{_configuration["BaseCodeList:0:Title"]}/{_configuration["BaseCodeList:0:FileName"]}";
                 listFile = _keil.UVProjectFileToIFileList(
-                    s);
-                
+                    sUvProjFilePath);
+
                 foreach (var file in listFile)
                 {
                     _keil.GenerateIFile(
-                        file, 
+                        file,
                         _objectPath);
                 }
-                
-                return RedirectToAction("Index", "Execute");
+
+                return true;
             }
             catch (Exception ex)
             {
-                ViewBag.ErrorMessage = ex.Message;
-                return View("Error");
+                TempData["ErrorInitProjectMessage"] = ex.Message;
+                return false;
             }
         }
-        
-        public ActionResult compile()
+
+        private bool RunProcess()
         {
-            string output;
+            try
+            {
+                bool bo;
+                string output;
 
-            List<string> outputs = _keil.CompileAll(
-                _objectPath,
-                Path.Combine(_sessionPath, @"MiniTG132"),
-                out output
-            );
+                List<string> outputs = _keil.CompileAll(
+                    _objectPath,
+                    Path.Combine(_sessionPath, @"MiniTG132"),
+                    out output
+                );
 
-            _keil.GenerateLNPFile(
-                listFile,
-                _objectPath
-            );
+                bo = _keil.GenerateLNPFile(
+                    listFile,
+                    _objectPath
+                );
 
-            _keil.BuildAll(
-                Path.Combine(_sessionPath, @"MiniTG132")
-            );
-            
-            // ViewData["OutputCompile"] = output;
-            // ViewData["OutputsCompile"] = outputs;
+                _keil.BuildAll(
+                    Path.Combine(_sessionPath, @"MiniTG132")
+                );
 
-            //return RedirectToAction("Index", "Home");
-            return View();
+                // ViewData["OutputCompile"] = output;
+                // ViewData["OutputsCompile"] = outputs;
+
+                //return RedirectToAction("Index", "Home");
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
     }
 }

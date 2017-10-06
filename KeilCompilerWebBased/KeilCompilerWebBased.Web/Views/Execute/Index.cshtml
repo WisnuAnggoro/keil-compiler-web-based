@@ -1,8 +1,8 @@
 @model KeilCompilerWebBased.Web.ViewModel.OSTypeViewModel
 
-<!-- <form method="post" 
-    enctype="multipart/form-data" 
-    asp-action="UploadSources" 
+<!-- <form method="post"
+    enctype="multipart/form-data"
+    asp-action="UploadSources"
     asp-controller="Execute">
     <input type="file" name="uvprojFile" width="100%" />
     <input type="submit" value="Upload" />
@@ -13,7 +13,7 @@
     	<div class="col-md-12">
 			<div class="panel panel-default">
 				<div class="panel-heading">
-                    <strong>Step 1: Select OS and Chip</strong> 
+                    <strong>Step 1: Select OS and Chip</strong>
                 </div>
                 <div class="panel-body">
                     <form asp-action="Index" method="post">
@@ -22,10 +22,19 @@
                             @for(int i = 0; i< Model.OSTypeList.Count; ++i)
                             {
                                 <div class="radio">
-                                    <label><input type="radio" asp-for="SelectedOSType" value="@Model.OSTypeList[i].Id">@Model.OSTypeList[i].Name</label>
+                                    <label>
+                                        @if(i == 0)
+                                        {
+                                            <input type="radio" asp-for="SelectedOSType" value="@Model.OSTypeList[i].Id" checked="checked">@Model.OSTypeList[i].Name
+                                        }
+                                        else
+                                        {
+                                            <input type="radio" asp-for="SelectedOSType" value="@Model.OSTypeList[i].Id">@Model.OSTypeList[i].Name
+                                        }
+                                    </label>
                                 </div>
                             }
-                            <p><label><span class="label label-danger">@ViewBag.ErrorOsSelection</span></label></p>
+                            <!-- <p><label><span class="label label-danger">@ViewBag.ErrorOsSelection</span></label></p> -->
                             <input class="btn btn-primary" type="submit" value="Next" />
                         </div>
                     </form>
@@ -40,62 +49,29 @@
     	<div class="col-md-12">
 			<div class="panel panel-default">
 				<div class="panel-heading">
-                    <strong>Step 2: Upload source files</strong> 
+                    <strong>Step 2: Upload source code files</strong>
                 </div>
-				<div class="panel-body">
-                    <form method="post" enctype="multipart/form-data" asp-action="UploadSources" asp-controller="Execute">
-					<div class="input-group">
-						<input placeholder="" 
-                            type="text" 
-                            class="form-control image-preview-filename" 
-                            disabled="disabled">
-						<!-- don't give a name === doesn't send on POST/GET --> 
-						<span class="input-group-btn"> 
-						<!-- image-preview-clear button -->
-						<!-- <button type="button" 
-                            class="btn btn-default image-preview-clear" 
-                            style="display:none;"> 
-                            <span class="glyphicon glyphicon-remove">Clear</span></button> -->
-						<!-- image-preview-input -->
-						<div 
-                            class="btn btn-default image-preview-input"> 
-                                <span class="glyphicon glyphicon-folder-open"></span> 
-                                <span class="image-preview-input-title">Browse</span>
-							<input type="file" name="uvprojFile" />
-							<!-- rename it --> 
-						</div>
-						<button 
-                            type="file" 
-                            class="btn btn-labeled btn-primary"
-                            name="uvprojFile"> 
-                                <span 
-                                    class="btn-label">
-                                        <i class="glyphicon glyphicon-upload"></i> 
-                                </span>Upload
-                        </button>
-						</span> 
-                    </div>
-                    </form>
-				</div>
+				<!-- <div class="panel-body">
+				</div> -->
 			</div>
-		</div>      
+		</div>
 	</div>
     <div class="row">
     	<div class="col-md-12">
             <div class="panel panel-default">
 				<div class="panel-heading">
-                    <strong>Step 3: Compile and Build</strong> 
+                    <strong>Step 3: Compile and Build</strong>
                 </div>
-				<div class="panel-body">
-                    
+				<!-- <div class="panel-body">
+
             @using (Html.BeginForm("compile", "Execute"))
             {
-                <button class="btn btn-labeled btn-primary btn-block" 
+                <button class="btn btn-labeled btn-primary btn-block"
                     aria-label="Left Align"
-                    type="submit" 
+                    type="submit"
                     name="compileall">Compile and Build</button>
             }
-				</div>
+				</div> -->
 			</div>
         </div>
     </div>
@@ -103,7 +79,7 @@
     	<div class="col-md-12">
             <div class="panel panel-default">
 				<div class="panel-heading">
-                    <strong>Step 4: Get Result</strong> 
+                    <strong>Step 4: Get Result</strong>
                 </div>
 			</div>
         </div>

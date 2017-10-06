@@ -17,9 +17,10 @@
     	<div class="col-md-12">
 			<div class="panel panel-default">
 				<div class="panel-heading">
-                    <strong>Step 2: Upload source files</strong> 
+                    <strong>Step 2: Upload source code files</strong> 
                 </div>
 				<div class="panel-body">
+                    <p>Press <strong>Browse</strong> button then select desired file(s) to be included in compiling process then press <strong>Upload</strong> button to continue.</p>
                     <form method="post" enctype="multipart/form-data" asp-action="UploadSources" asp-controller="Execute">
 					<div class="input-group">
 						<input placeholder="" 
@@ -35,18 +36,19 @@
                             style="display:none;"> 
                             <span class="glyphicon glyphicon-remove">Clear</span></button> -->
 						<!-- image-preview-input -->
-                        <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+                        <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script> -->
+                        <script src="~/lib/jquery/dist/jquery.min.js"></script>
 						<div class="btn btn-default image-preview-input"> 
                             <span class="glyphicon glyphicon-folder-open"></span> 
                             <span class="image-preview-input-title">Browse</span>
-							<input type="file" name="uvprojFile" multiple />
-                            <input id="my-file-selector" type="file" style="display:none;" onchange="$('#upload-file-info').val($(this).val());">
+							<input type="file" name="SourceCodeFiles" multiple onchange="$('#upload-file-info').val($(this).val());" />
+                            <!-- <input id="my-file-selector" type="file" style="display:none;" onchange="$('#upload-file-info').val($(this).val());"> -->
 							<!-- rename it --> 
 						</div>
 						<button 
                             type="file" 
                             class="btn btn-labeled btn-primary"
-                            name="uvprojFile"> 
+                            name="SourceCodeFiles"> 
                                 <span 
                                     class="btn-label">
                                         <i class="glyphicon glyphicon-upload"></i> 
@@ -55,6 +57,7 @@
 						</span> 
                     </div>
                     </form>
+                    <p><label><span class="label label-danger">@ViewBag.ErrorUploadSource</span></label></p>
 				</div>
 			</div>
 		</div>      
@@ -65,7 +68,7 @@
 				<div class="panel-heading">
                     <strong>Step 3: Compile and Build</strong> 
                 </div>
-				<div class="panel-body">
+				<!-- <div class="panel-body">
                     
             @using (Html.BeginForm("compile", "Execute"))
             {
@@ -74,7 +77,7 @@
                     type="submit" 
                     name="compileall">Compile and Build</button>
             }
-				</div>
+				</div> -->
 			</div>
         </div>
     </div>
