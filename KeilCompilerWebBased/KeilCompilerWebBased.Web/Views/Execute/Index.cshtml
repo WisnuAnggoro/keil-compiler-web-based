@@ -1,16 +1,87 @@
-<h1 align="center">CIPTA Web-based Keil Compiler</h1>
-<h3>Upload .uvproj File</h3>
-<form align="center" 
-    method="post" 
-    enctype="multipart/form-data" 
-    asp-action="UploadSources" 
+@model KeilCompilerWebBased.Web.ViewModel.OSTypeViewModel
+
+<!-- <form method="post"
+    enctype="multipart/form-data"
+    asp-action="UploadSources"
     asp-controller="Execute">
     <input type="file" name="uvprojFile" width="100%" />
     <input type="submit" value="Upload" />
-</form>
+</form> -->
 
-<h3>Compile and Build</h3>
-@using (Html.BeginForm("compile", "Execute"))
-{
-    <button style="margin:5px" type="submit" name="compileall">Compile All</button>
-}
+<div class="container"><br />
+    <div class="row">
+    	<div class="col-md-12">
+			<div class="panel panel-default">
+				<div class="panel-heading">
+                    <strong>Step 1: Select OS and Chip</strong>
+                </div>
+                <div class="panel-body">
+                    <form asp-action="Index" method="post">
+                        <div class="input-group">
+                            <p>Please select one of the following OS and chip types to initialize the process!</p>
+                            @for(int i = 0; i< Model.OSTypeList.Count; ++i)
+                            {
+                                <div class="radio">
+                                    <label>
+                                        @if(i == 0)
+                                        {
+                                            <input type="radio" asp-for="SelectedOSType" value="@Model.OSTypeList[i].Id" checked="checked">@Model.OSTypeList[i].Name
+                                        }
+                                        else
+                                        {
+                                            <input type="radio" asp-for="SelectedOSType" value="@Model.OSTypeList[i].Id">@Model.OSTypeList[i].Name
+                                        }
+                                    </label>
+                                </div>
+                            }
+                            <!-- <p><label><span class="label label-danger">@ViewBag.ErrorOsSelection</span></label></p> -->
+                            <input class="btn btn-primary" type="submit" value="Next" />
+                        </div>
+                    </form>
+                    <!-- <div class="alert alert-danger">
+                        @ViewBag.ErrorOsSelection
+                    </div> -->
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+    	<div class="col-md-12">
+			<div class="panel panel-default">
+				<div class="panel-heading">
+                    <strong>Step 2: Upload source code files</strong>
+                </div>
+				<!-- <div class="panel-body">
+				</div> -->
+			</div>
+		</div>
+	</div>
+    <div class="row">
+    	<div class="col-md-12">
+            <div class="panel panel-default">
+				<div class="panel-heading">
+                    <strong>Step 3: Compile and Build</strong>
+                </div>
+				<!-- <div class="panel-body">
+
+            @using (Html.BeginForm("compile", "Execute"))
+            {
+                <button class="btn btn-labeled btn-primary btn-block"
+                    aria-label="Left Align"
+                    type="submit"
+                    name="compileall">Compile and Build</button>
+            }
+				</div> -->
+			</div>
+        </div>
+    </div>
+    <div class="row">
+    	<div class="col-md-12">
+            <div class="panel panel-default">
+				<div class="panel-heading">
+                    <strong>Step 4: Get Result</strong>
+                </div>
+			</div>
+        </div>
+    </div>
+</div>
