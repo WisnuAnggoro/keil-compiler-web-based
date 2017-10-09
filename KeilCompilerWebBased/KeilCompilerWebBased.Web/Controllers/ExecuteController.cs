@@ -75,11 +75,11 @@ namespace KeilCompilerWebBased.Web.Controllers
                 _selectedOsIndex = Int32.Parse(OsTypeViewModel.SelectedOSType);
 
                 // Int32.TryParse(
-                //     OsTypeViewModel.SelectedOSType, 
+                //     OsTypeViewModel.SelectedOSType,
                 //     out iSelectOs);
 
                 // return RedirectToAction(
-                //     "UploadSources", 
+                //     "UploadSources",
                 //     new { SelectedOsIndex = _selectedOsIndex });
 
                 return RedirectToAction(
@@ -165,14 +165,24 @@ namespace KeilCompilerWebBased.Web.Controllers
                 return View(
                     "CompileAndBuild",
                     sourceCodeVM);
+
+                // TempData["UploadedSourceCodeList"] = sourceCodeVM;
+
+                // return RedirectToAction(
+                //     "CompileAndBuild"
+                //     // , new SourceCodeFilesViewModel(){
+                //     //     SourceCodeFileList = uploadedSourceCodeFileList}
+                //         );
+
+                // return View("CompileAndBuild");
             }
             else
             {
                 TempData["ErrorUploadSourceMessage"] =
-                    "Please select at least one file before press UPLOAD button!";
+                    "Please select at least one file before press Upload button!";
 
                 // return View(
-                //     "UploadSources", 
+                //     "UploadSources",
                 //     new { SelectedOsIndex = _selectedOsIndex });
 
                 return RedirectToAction(
@@ -181,27 +191,71 @@ namespace KeilCompilerWebBased.Web.Controllers
         }
 
         public IActionResult CompileAndBuild(
-            SourceCodeFilesViewModel sourceCodeFilesVM)
+            SourceCodeFilesViewModel sourceCodeFilesVM
+        )
         {
+            ViewBag.SelectedOsType = _osTypeList[_selectedOsIndex - 1].Name;
+
+            // SourceCodeFilesViewModel sourceCodeFilesVM =
+            //     (SourceCodeFilesViewModel)TempData["UploadedSourceCodeList"];
             return View(sourceCodeFilesVM);
         }
 
         [HttpPost]
         public IActionResult CompileAndBuild()
         {
-            RunProcess();
+            bool res = RunProcess();
+            return View(
+                "DownloadFiles");
+        }
+
+        public IActionResult DownloadFiles(
+            bool boResult)
+        {
+            if(boResult)
+            {
+                ViewBag.DownloadFilesReady = "Success";
+            }
+            else
+            {
+                ViewBag.DownloadFilesReady = "Fail";
+            }
             return View();
         }
 
-        public async Task<IActionResult> DownloadHex(string filePath)
-        {
-            // Find Hex File
+        // [HttpPost]
+        // public IActionResult DownloadFiles(
+        //     )
+        // {
             
-            IFileProvider provider = new PhysicalFileProvider(filePath);
-            IFileInfo fileInfo = provider.GetFileInfo(fileName);
-            var readStream = fileInfo.CreateReadStream();
-            var mimeType = "application/vnd.ms-excel";
-            return File(readStream, mimeType, fileName);
+        //     return View();
+        // }
+
+        public IActionResult DownloadHex()
+        {
+            try
+            {
+                string filePath = _objectPath;
+
+                // Find Hex File
+                string[] hexFiles = Directory
+                    .GetFiles(_objectPath, "*.hex")
+                    .Select(Path.GetFileName)
+                    .ToArray();
+
+                string fileName = hexFiles[0];
+
+                IFileProvider provider = new PhysicalFileProvider(
+                    filePath);
+                IFileInfo fileInfo = provider.GetFileInfo(fileName);
+                var readStream = fileInfo.CreateReadStream();
+                var mimeType = "text/plain";
+                return File(readStream, mimeType, fileName);
+            }
+            catch (Exception ex)
+            {
+                return Ok();
+            }
         }
 
         private bool InitProject(int ProjectNumber)
