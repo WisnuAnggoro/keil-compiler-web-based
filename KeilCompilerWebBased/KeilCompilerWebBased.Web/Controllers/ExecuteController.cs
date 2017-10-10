@@ -21,14 +21,24 @@ namespace KeilCompilerWebBased.Web.Controllers
         // Root path, like '/' in linux
         private static string _rootPath;
 
+        // Path to get Keil executable file
+        private static string _keilBinPath;
+
         // Path dedicated per session
         private static string _sessionPath;
+        
+        // Title of selected project,
+        // used in Compiling and Building process
+        private static string _titleProject;
 
         // Path to get source project
         private static string _sourcePath;
 
         // Path to create the HEX file
         private static string _objectPath;
+
+        // Relative path of output directory
+        private static string _outDirRelative;
 
         // Containing list of *.__i files
         private static List<IncludeDirectoryPath> listFile;
@@ -45,6 +55,7 @@ namespace KeilCompilerWebBased.Web.Controllers
         {
             _configuration = configuration;
             _rootPath = _configuration["RootPath"];
+            _keilBinPath = _configuration["KeilBinPath"];
             _keil = new Keil();
 
             // Initialize the available OS source
@@ -111,7 +122,7 @@ namespace KeilCompilerWebBased.Web.Controllers
                 // If error occurs, user can't do anything
                 // Better call the Admin
                 ViewBag.ErrorMessage =
-                    "Unable to initialize project." +
+                    "Unable to initialize project. " +
                     TempData["ErrorInitProjectMessage"];
 
                 return View("Error");
@@ -254,7 +265,11 @@ namespace KeilCompilerWebBased.Web.Controllers
             }
             catch (Exception ex)
             {
-                return Ok();
+                ViewBag.ErrorMessage =
+                    "Unable to create hex files. " +
+                    ex.Message;
+
+                return View("Error");
             }
         }
 
@@ -267,6 +282,8 @@ namespace KeilCompilerWebBased.Web.Controllers
             try
             {
                 // string argument = "BaseCodeList:0:BasePath";
+
+                _titleProject = _configuration[BaseCodeList + ":Title"];
 
                 _sessionPath = Path.Combine(
                     _rootPath,
@@ -287,6 +304,9 @@ namespace KeilCompilerWebBased.Web.Controllers
                     _configuration[BaseCodeList + ":ZipPath"],
                     _sessionPath);
 
+                // Setting output relative directory for compiler and builder
+                _outDirRelative = _configuration[BaseCodeList + ":OutDirRelative"];
+
                 listFile = new List<IncludeDirectoryPath>();
                 string sUvProjFilePath = String.Format(
                     "{0}/{1}/{2}",
@@ -304,6 +324,7 @@ namespace KeilCompilerWebBased.Web.Controllers
                         file,
                         _objectPath);
                 }
+
 
                 return true;
             }
@@ -323,7 +344,9 @@ namespace KeilCompilerWebBased.Web.Controllers
 
                 List<string> outputs = _keil.CompileAll(
                     _objectPath,
-                    Path.Combine(_sessionPath, @"MiniTG132"),
+                    Path.Combine(_sessionPath, _titleProject),
+                    _keilBinPath,
+                    _outDirRelative,
                     out output
                 );
 
@@ -333,7 +356,9 @@ namespace KeilCompilerWebBased.Web.Controllers
                 );
 
                 _keil.BuildAll(
-                    Path.Combine(_sessionPath, @"MiniTG132")
+                    Path.Combine(_sessionPath, _titleProject),
+                    _keilBinPath,
+                    _outDirRelative
                 );
 
                 // ViewData["OutputCompile"] = output;

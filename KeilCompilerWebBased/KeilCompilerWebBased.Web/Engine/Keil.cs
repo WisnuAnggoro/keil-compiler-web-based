@@ -14,6 +14,10 @@ namespace KeilCompilerWebBased.Web.Engine
     {
         public static KeilProjectFile KeilProjectFile { get; private set; }
 
+        // BinDirectoryPath and OutputDirectoryRelative are retrieved from appsetting.json
+        public static string BinDirectoryPath { get; set; }
+        public static string OutputDirectoryRelative { get; set; }
+
         public List<IncludeDirectoryPath> UVProjectFileToIFileList(
             string uvprojPath)
         {
@@ -219,6 +223,8 @@ namespace KeilCompilerWebBased.Web.Engine
         public List<string> CompileAll(
             string folderpath,
             string targetpath,
+            string keilbinpath,
+            string outdirrelative,
             out string outputcommand)
         {
             StringBuilder sb = new StringBuilder();
@@ -226,8 +232,8 @@ namespace KeilCompilerWebBased.Web.Engine
 
             try
             {
-                KeilProjectFile.BinPath = "/home/wisnu/.wine/drive_c/keil/c51/bin/";
-                KeilProjectFile.OutputDirectory = "./TG132/Obj/";
+                // KeilProjectFile.BinPath = "/home/wisnu/.wine/drive_c/keil/c51/bin/";
+                // KeilProjectFile.OutputDirectory = "./TG132/Obj/";
 
                 string strCmdText = "";
                 // string strCmdTextAll = "";
@@ -249,9 +255,9 @@ namespace KeilCompilerWebBased.Web.Engine
 
                         strCmdText = string.Format("-c \"cd {0} && wine {1}{2} @{3}{4}\"",
                             targetpath,
-                            KeilProjectFile.BinPath,
+                            keilbinpath,
                             CompilerFile,
-                            KeilProjectFile.OutputDirectory,
+                            outdirrelative,
                             Path.GetFileName(file));
 
                         // strCmdTextAll += string.Format(" && wine {0}{1} @{2}{3}",
@@ -318,14 +324,16 @@ namespace KeilCompilerWebBased.Web.Engine
         }
 
         public List<string> BuildAll(
-            string targetpath)
+            string targetpath,
+            string keilbinpath,
+            string outdirrelative)
         {
             List<string> listStr = new List<string>();
 
             try
             {
-                KeilProjectFile.BinPath = "/home/wisnu/.wine/drive_c/keil/c51/bin/";
-                KeilProjectFile.OutputDirectory = "./TG132/Obj/";
+                // KeilProjectFile.BinPath = "/home/wisnu/.wine/drive_c/keil/c51/bin/";
+                // KeilProjectFile.OutputDirectory = "./TG132/Obj/";
 
                 // Execute LX51.exe
                 // string strCmdText = String.Format(
@@ -338,8 +346,8 @@ namespace KeilCompilerWebBased.Web.Engine
                 string strCmdText = string.Format(
                     "-c \"cd {0} && wine {1}LX51.EXE @{2}{3}.LNP\"",
                     targetpath,
-                    KeilProjectFile.BinPath,
-                    KeilProjectFile.OutputDirectory,
+                    keilbinpath,
+                    outdirrelative,
                     KeilProjectFile.OutputName);
 
                 string errr;
@@ -358,7 +366,7 @@ namespace KeilCompilerWebBased.Web.Engine
                 var directory = new DirectoryInfo(
                     Path.Combine(
                         targetpath,
-                        KeilProjectFile.OutputDirectory));
+                        outdirrelative));
                 var myFile = (from f in directory.GetFiles()
                     orderby f.LastWriteTime descending
                     select f).First();
@@ -375,8 +383,8 @@ namespace KeilCompilerWebBased.Web.Engine
                 strCmdText = string.Format(
                     "-c \"cd {0} && wine {1}OHX51.EXE \"{2}{3}\" H386\"",
                     targetpath,
-                    KeilProjectFile.BinPath,
-                    KeilProjectFile.OutputDirectory,
+                    keilbinpath,
+                    outdirrelative,
                     KeilProjectFile.OutputName);
 
                 s = RunConsole(strCmdText, out errr);
