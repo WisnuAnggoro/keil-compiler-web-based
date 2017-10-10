@@ -1,9 +1,17 @@
 ﻿@model ErrorViewModel
 @{
-    ViewData["Title"] = "Error";
+    ViewData["Title"] = "We've got some trouble";
 }
 
-<h1 class="text-danger">Error.</h1>
-<h2 class="text-danger">An error occurred while processing your request.</h2>
-
-<p class="text-danger">@ViewBag.ErrorMessage</p>
+<div class="container"><br />
+    <div class="row">
+    	<div class="col-md-12">
+            <div class="alert alert-danger">
+                <strong>We've got some trouble.</strong> @ViewBag.ErrorMessage
+            </div>
+            <div class="alert alert-info">
+                Please contact Admin and tell them the step by step until you reach this error, or go back to <a asp-area="" asp-controller="Execute" asp-action="Index"><strong>Initial Page</strong></a> instead.
+            </div>
+        </div>
+    </div>
+</div>

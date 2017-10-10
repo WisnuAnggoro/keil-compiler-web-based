@@ -1,0 +1,66 @@
+<div class="container"><br />
+    <div class="row">
+    	<div class="col-md-12">
+			<div class="panel panel-default">
+				<div class="panel-heading">
+                    <strong>Step 1: Select OS and Chip</strong> 
+                </div>
+                <div class="panel-body">
+                    <div class="alert alert-success">
+                        <strong>Success!</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+    	<div class="col-md-12">
+			<div class="panel panel-default">
+				<div class="panel-heading">
+                    <strong>Step 2: Upload source code files</strong> 
+                </div>
+				<div class="panel-body">
+                    <div class="alert alert-success">
+                        <strong>Success!</strong>
+                    </div>
+				</div>
+			</div>
+		</div>      
+	</div>
+    <div class="row">
+    	<div class="col-md-12">
+            <div class="panel panel-default">
+				<div class="panel-heading">
+                    <strong>Step 3: Compile and Build</strong> 
+                </div>
+				<div class="panel-body">
+                    <div class="alert alert-success">
+                        <strong>Success!</strong> Compilation and building process has been run.
+                    </div>
+				</div>
+			</div>
+        </div>
+    </div>
+    <div class="row">
+    	<div class="col-md-12">
+            <div class="panel panel-default">
+				<div class="panel-heading">
+                    <strong>Step 4: Get Result</strong> 
+                </div>
+				<div class="panel-body">
+                <p>Press the following <strong>Download</strong> button to download the file.</p>
+                <!-- <form method="post" asp-action="DownloadFiles">
+                    <input class="btn btn-primary btn-primary btn-block" type="submit" value="Download Hex File" />
+                </form> -->
+                @using (Html.BeginForm("DownloadHex", "Execute"))
+                {
+                    <button class="btn btn-labeled btn-primary btn-block" 
+                        aria-label="Left Align"
+                        type="submit" 
+                        name="Download">Download</button>
+                }
+				</div>
+			</div>
+        </div>
+    </div>
+</div>

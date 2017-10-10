@@ -8,12 +8,14 @@
     <environment include="Development">
         <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.css" />
         <link rel="stylesheet" href="~/css/site.css" />
+        <link rel="stylesheet" href="~/css/layout.css" />
     </environment>
     <environment exclude="Development">
         <link rel="stylesheet" href="https://ajax.aspnetcdn.com/ajax/bootstrap/3.3.7/css/bootstrap.min.css"
               asp-fallback-href="~/lib/bootstrap/dist/css/bootstrap.min.css"
               asp-fallback-test-class="sr-only" asp-fallback-test-property="position" asp-fallback-test-value="absolute" />
         <link rel="stylesheet" href="~/css/site.min.css" asp-append-version="true" />
+        <link rel="stylesheet" href="~/css/layout.min.css" asp-append-version="true" />
     </environment>
 
 </head>
@@ -27,7 +29,7 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a asp-area="" asp-controller="Home" asp-action="Index" class="navbar-brand">Keil Compiler Web Based</a>
+                <!-- <a asp-area="" asp-controller="Home" asp-action="Index" class="navbar-brand">Keil Compiler Web Based</a> -->
             </div>
             <!-- <div class="navbar-collapse collapse">
                 <ul class="nav navbar-nav">
@@ -39,10 +41,19 @@
         </div>
     </nav>
     <div class="container body-content">
+    <div class="row">
+        <div class="col-md-12">
+            <br />
+            <a asp-area="" asp-controller="Execute" asp-action="Index">
+                <img src="../images/logocipta.png" class="img-responsive center-block" alt="Cipta Srigati Lestari">
+            </a>
+            <h1 align="center">Web-based Keil Compiler</h1>
+        </div>
+    </div>
         @RenderBody()
         <hr />
         <footer>
-            <p>&copy; 2017 - Keil Compiler Web Based</p>
+            <p>&copy; 2017 - Research and Development Team - Cipta Srigati Lestari</p>
         </footer>
     </div>
 

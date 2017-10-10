@@ -1,3 +1,50 @@
-<!-- @Html.Raw(Html.Encode(@ViewData["OutputCompile"]).Replace(Environment.NewLine, "<br />")) -->
-
-<p><span>@Html.Raw(HtmlDecode(@ViewData["OutputCompile"]))</span></p>
+<div class="container"><br />
+    <div class="row">
+    	<div class="col-md-12">
+			<div class="panel panel-default">
+				<div class="panel-heading">
+                    <strong>Upload source files</strong> 
+                    <small> </small>
+                </div>
+				<div class="panel-body">
+                    <form method="post" enctype="multipart/form-data" asp-action="UploadSources" asp-controller="Execute">
+					<div class="input-group">
+						<input placeholder="" 
+                            type="text" 
+                            class="form-control image-preview-filename" 
+                            disabled="disabled">
+						<span class="input-group-btn">
+						<div 
+                            class="btn btn-default image-preview-input"> 
+                                <span class="glyphicon glyphicon-folder-open"></span> 
+                                <span class="image-preview-input-title">Browse</span>
+							<input type="file" name="uvprojFile" />
+						</div>
+						<button 
+                            type="file" 
+                            class="btn btn-labeled btn-primary"
+                            name="uvprojFile"> 
+                                <span 
+                                    class="btn-label">
+                                        <i class="glyphicon glyphicon-upload"></i> 
+                                </span>Upload
+                        </button>
+						</span> 
+                    </div>
+                    </form>
+				</div>
+			</div>
+		</div>      
+	</div>
+    <div class="row">
+    	<div class="col-md-12">
+            @using (Html.BeginForm("compile", "Execute"))
+            {
+                <button class="btn btn-labeled btn-primary btn-block" 
+                    aria-label="Left Align"
+                    type="submit" 
+                    name="compileall">Compile and Build</button>
+            }
+        </div>
+    </div>
+</div>
