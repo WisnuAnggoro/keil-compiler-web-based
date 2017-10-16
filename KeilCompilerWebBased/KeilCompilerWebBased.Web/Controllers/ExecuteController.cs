@@ -213,9 +213,9 @@ namespace KeilCompilerWebBased.Web.Controllers
         }
 
         [HttpPost]
-        public IActionResult CompileAndBuild()
+        public async Task<IActionResult> CompileAndBuild()
         {
-            bool res = RunProcess();
+            bool res = await RunProcess();
             return View(
                 "DownloadFiles");
         }
@@ -335,19 +335,20 @@ namespace KeilCompilerWebBased.Web.Controllers
             }
         }
 
-        private bool RunProcess()
+        private async Task<bool> RunProcess()
         {
             try
             {
                 bool bo;
                 string output;
 
-                List<string> outputs = _keil.CompileAll(
+                List<string> outputs = await _keil.CompileAll(
                     _objectPath,
                     Path.Combine(_sessionPath, _titleProject),
                     _keilBinPath,
-                    _outDirRelative,
-                    out output
+                    _outDirRelative
+                    // ,
+                    // out output
                 );
 
                 bo = _keil.GenerateLNPFile(
@@ -355,7 +356,7 @@ namespace KeilCompilerWebBased.Web.Controllers
                     _objectPath
                 );
 
-                _keil.BuildAll(
+                string s = await _keil.BuildAll(
                     Path.Combine(_sessionPath, _titleProject),
                     _keilBinPath,
                     _outDirRelative

@@ -7,6 +7,7 @@ using System.Text;
 using System.Xml.Linq;
 using System;
 using System.IO.Compression;
+using System.Threading.Tasks;
 
 namespace KeilCompilerWebBased.Web.Engine
 {
@@ -220,12 +221,14 @@ namespace KeilCompilerWebBased.Web.Engine
             return boRet;
         }
 
-        public List<string> CompileAll(
+        public async Task<List<string>> CompileAll(
             string folderpath,
             string targetpath,
             string keilbinpath,
-            string outdirrelative,
-            out string outputcommand)
+            string outdirrelative
+            // ,
+            // out string outputcommand
+            )
         {
             StringBuilder sb = new StringBuilder();
             List<string> listStr = new List<string>();
@@ -275,18 +278,18 @@ namespace KeilCompilerWebBased.Web.Engine
                         // strCmdText = "-c \"wine --version\"";
 
                         string errr;
-                        string s = RunConsole(strCmdText, out errr);
+                        string s = await RunConsole(strCmdText/*, out errr*/);
 
-                        if(errr != "")
-                        {
-                            sb.AppendLine(errr);
-                            listStr.Add(errr);
-                        }
-                        if(s != "")
-                        {
-                            sb.AppendLine(s);
-                            listStr.Add(s);
-                        }
+                        // if(errr != "")
+                        // {
+                        //     sb.AppendLine(errr);
+                        //     listStr.Add(errr);
+                        // }
+                        // if(s != "")
+                        // {
+                        //     sb.AppendLine(s);
+                        //     listStr.Add(s);
+                        // }
                     }
                 }
 
@@ -315,7 +318,7 @@ namespace KeilCompilerWebBased.Web.Engine
             }
             finally
             {
-                outputcommand = sb.ToString();
+                // outputcommand = sb.ToString();
 
             }
             
@@ -323,12 +326,12 @@ namespace KeilCompilerWebBased.Web.Engine
             
         }
 
-        public List<string> BuildAll(
+        public async Task<string> BuildAll(
             string targetpath,
             string keilbinpath,
             string outdirrelative)
         {
-            List<string> listStr = new List<string>();
+            // List<string> listStr = new List<string>();
 
             try
             {
@@ -351,16 +354,16 @@ namespace KeilCompilerWebBased.Web.Engine
                     KeilProjectFile.OutputName);
 
                 string errr;
-                string s = RunConsole(strCmdText, out errr);
+                string s = await RunConsole(strCmdText/*, out errr*/);
 
-                if(errr != "")
-                {
-                    listStr.Add(errr);
-                }
-                if(s != "")
-                {
-                    listStr.Add(s);
-                }
+                // if(errr != "")
+                // {
+                //     listStr.Add(errr);
+                // }
+                // if(s != "")
+                // {
+                //     listStr.Add(s);
+                // }
 
                 // Find the newest file name
                 var directory = new DirectoryInfo(
@@ -387,28 +390,32 @@ namespace KeilCompilerWebBased.Web.Engine
                     outdirrelative,
                     KeilProjectFile.OutputName);
 
-                s = RunConsole(strCmdText, out errr);
+                s = await RunConsole(strCmdText/*, out errr*/);
 
-                if(errr != "")
-                {
-                    listStr.Add(errr);
-                }
-                if(s != "")
-                {
-                    listStr.Add(s);
-                }
+                // if(errr != "")
+                // {
+                //     listStr.Add(errr);
+                // }
+                // if(s != "")
+                // {
+                //     listStr.Add(s);
+                // }
+                return s;
             }
             catch (Exception ex)
             {
                 string ss = ex.Message;
+                return String.Empty;
             }
 
-            return listStr;
+            // return listStr;
+
         }
 
-        public string RunConsole(
-            string cmd,
-            out string err
+        public async Task<string> RunConsole(
+            string cmd
+            // ,
+            // out string err
         )
         {
             Process process = new Process();
@@ -419,9 +426,9 @@ namespace KeilCompilerWebBased.Web.Engine
             process.StartInfo.RedirectStandardError = true;
             process.Start();
             //* Read the output (or the error)
-            string output = process.StandardOutput.ReadToEnd();
+            string output = await process.StandardOutput.ReadToEndAsync();
             // Console.WriteLine(output);
-            err = process.StandardError.ReadToEnd();
+            // err = process.StandardError.ReadToEnd();
             // Console.WriteLine(err);
             process.WaitForExit();
 
